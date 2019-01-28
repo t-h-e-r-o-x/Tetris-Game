@@ -67,39 +67,76 @@ function Piece (tetromino, colour){
   this.y = 0;
 }
 
-//draw a piece to the board
+//Fill function - to make draw and undraw easier to read
 
-Piece.prototype.draw = function (){
+Piece.prototype.fill = function(color){
   for(var r=0 ; r<this.activeTetromino.length ; r++){
     for(var c=0 ; c<this.activeTetromino.length ; c++){
-      //draw only the occupied squares, i.e, which return 1
       if(this.activeTetromino[r][c]){
-        drawSquare(this.x + c, this.y + r, this.colour); //drawing the appropriate tetris shape
+        drawSquare(this.x + c, this.y + r, color);
       }
     }
   }
 }
 
+//draw a piece to the board
+
+Piece.prototype.draw = function (){
+  this.fill(this.colour);
+}
+
 //to undraw the shape or to make it dissappear from its current position
 
-Piece.prototype.undraw = function(){
-  for(var r=0 ; r<this.activeTetromino.length ; r++){
-    for(var c=0 ; c<this.activeTetromino.length ; c++){
-      if(this.activeTetromino[r][c]){
-        drawSquare(this.x + c, this.y + r, vacant);
-      }
-    }
-  }
-
+Piece.prototype.unDraw = function(){
+  this.fill(vacant);
 }
 
 //move piece down
 
 Piece.prototype.moveDown = function(){
-  this.undraw();
+  this.unDraw();
   this.y++;
   this.draw();
 }
+
+//move the piece right
+
+Piece.prototype.moveRight = function(){
+  this.unDraw();
+  this.x++;
+  this.draw();
+}
+
+//move the piece left
+
+Piece.prototype.moveLeft = function(){
+  this.unDraw();
+  this.x--;
+  this.draw();
+}
+
+//rotate the piece
+Piece.prototype.rotate = function(){
+  this.unDraw();
+  this.tetrominoN = (this.tetrominoN + 1) % (this.tetromino.length);
+  this.activeTetromino = this.activeTetromino[this.tetrominoN];
+  this.draw();
+}
+//hello, which key you looking for??
+document.addEventListener("keydown", check);
+
+function check(e){
+  if(e.keyCode == 37)
+    p.moveLeft();
+  else if(e.keyCode == 38)
+    p.rotate();
+  else if(e.keyCode == 39)
+    p.moveRight();
+  else if(e.keyCode == 40)
+    p.moveDown();
+
+  }
+
 
 //1sec interval for dropping the pieces
 let dropStart = Date.now();
