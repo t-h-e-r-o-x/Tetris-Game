@@ -17,7 +17,7 @@ function drawSquare(x,y,colour){
 
 }
 
-//create board
+//create board and setting all squares to be vacant
 
 let board = [];
 for(var r=0; r<row ; r++){
@@ -38,7 +38,9 @@ function drawBoard() {
 }
 
 drawBoard();
-//pieces and their colours
+
+
+//associating pieces with their colours
 
 const pieces = [
   [Z,"red"],
@@ -64,18 +66,51 @@ function Piece (tetromino, colour){
   this.x = 0;
   this.y = 0;
 }
+
 //draw a piece to the board
 
 Piece.prototype.draw = function (){
-  for(var r=0 ; r<row ; r++){
-    for(var c=0 ; c<col ; c++){
+  for(var r=0 ; r<this.activeTetromino.length ; r++){
+    for(var c=0 ; c<this.activeTetromino.length ; c++){
       //draw only the occupied squares, i.e, which return 1
       if(this.activeTetromino[r][c]){
-        drawSquare(this.x + c, this.y + r, this.colour);
+        drawSquare(this.x + c, this.y + r, this.colour); //drawing the appropriate tetris shape
       }
     }
   }
 }
 
+//to undraw the shape or to make it dissappear from its current position
 
-p.draw();
+Piece.prototype.undraw = function(){
+  for(var r=0 ; r<this.activeTetromino.length ; r++){
+    for(var c=0 ; c<this.activeTetromino.length ; c++){
+      if(this.activeTetromino[r][c]){
+        drawSquare(this.x + c, this.y + r, vacant);
+      }
+    }
+  }
+
+}
+
+//move piece down
+
+Piece.prototype.moveDown = function(){
+  this.undraw();
+  this.y++;
+  this.draw();
+}
+
+//1sec interval for dropping the pieces
+let dropStart = Date.now();
+function drop(){
+  let now = Date.now();
+  let delta = now - dropStart;
+  if(delta >= 1000){
+    p.moveDown();
+    dropStart = Date.now();
+  }
+  requestAnimationFrame(drop);
+}
+
+drop();
