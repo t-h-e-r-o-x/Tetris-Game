@@ -28,7 +28,6 @@ for(var r=0; r<row ; r++){
 }
 
 //draw board
-//Why new function? We have to call drawboard over and over!!
 function drawBoard() {
   for(var r=0 ; r<row ; r++){
     for(var c=0 ; c<col ; c++){
@@ -41,7 +40,6 @@ drawBoard();
 
 
 //associating pieces with their colours
-
 const pieces = [
   [Z,"red"],
   [S,"green"],
@@ -51,10 +49,17 @@ const pieces = [
   [I,"cyan"],
   [J,"orange"]
 ];
-//initate pieces
 
-let p = new Piece( pieces[0][0], pieces[0][1]);
+//generate random piece after locked
+function rand() {
+  let r = Math.floor(Math.random()*pieces.length);
+  let c0 = pieces[r][0];
+  let c1 = pieces[r][1];
+  return new Piece(c0,c1);
+}
 
+//initate instance of pieces
+let p = rand();
 //creating piece object
 
 function Piece (tetromino, colour){
@@ -63,8 +68,8 @@ function Piece (tetromino, colour){
   this.tetrominoN = 0; //beginning with the zeroth pattern
   this.activeTetromino = this.tetromino[this.tetrominoN];
   //to control the pieces
-  this.x = 0;
-  this.y = 0;
+  this.x = 3;
+  this.y = -2;
 }
 
 //Fill function - to make draw and undraw easier to read
@@ -102,7 +107,8 @@ Piece.prototype.moveDown = function(){
   }
   else //lock the piece and generate new pieces
   {
-
+    this.lock();
+    p = rand();
   }
 }
 
@@ -115,10 +121,6 @@ Piece.prototype.moveRight = function(){
     this.x++;
     this.draw();
   }
-  else //lock the piece and generate new pieces
-  {
-
-  }
 }
 
 //move the piece left
@@ -130,26 +132,68 @@ Piece.prototype.moveLeft = function(){
     this.x--;
     this.draw();
   }
-  else //lock the piece and generate new pieces
-  {
-
-  }
 }
 
 //rotate the piece
 Piece.prototype.rotate = function(){
   let n = (this.tetrominoN + 1) % (this.tetromino.length);
   let nextpat = this.tetromino[n];
-  if(!this.col_detect(0,0,nextpat))
+  let kick = 0;
+
+  if(this.col_detect(0,0,nextpat)){
+    if(this.x < col/2) //left wall caused collision
+    {
+      kick = 1 ;
+    }
+
+    else{ //right wall caused collision
+      kick = 1;
+    }
+  }
+
+  if(!this.col_detect(kick,0,nextpat))
   {
     this.unDraw();
     this.tetrominoN = (this.tetrominoN + 1) % (this.tetromino.length);
     this.activeTetromino = this.tetromino[this.tetrominoN];
     this.draw();
   }
-  else //lock the piece and generate new one
-  {
 
+}
+//lock piece
+Piece.prototype.lock = function(){
+  for(var r=0; r < this.activeTetromino.length ; r++){
+    for(var c=0 ; c< this.activeTetromino.length; c++){
+      if(this.activeTetromino[r][c]){
+        if(this.y + r < 0){
+          alert("Game Over");
+          gameOver = true;
+          break;
+        }
+        let m = this.y + r;
+        let n = this.x + c;
+        board[m][n] = this.colour;
+      }
+    }
+  }
+
+  for( var r=0 ; r<row ; r++){
+    let k = true;
+    for(var c=0 ; c<col ; c++){
+      if(board[r][c] == vacant){
+        k = false;
+      }
+    }
+    if (k) {
+      for(var m = r ; m > 0 ; m--){
+        for(var n = 0 ; n < col ; n++){
+          board[m][n] = board [m-1][n];
+        }
+      }
+      for(var n = 0 ; n<col ; n++){
+        board[0][n] = vacant;
+      }
+    }
   }
 }
 
@@ -212,7 +256,7 @@ function check(e){
 
 //1sec interval for dropping the pieces
 let dropStart = Date.now();
-
+let gameOver = false;
 function drop(){
   let now = Date.now();
   let delta = now - dropStart;
@@ -220,6 +264,7 @@ function drop(){
     p.moveDown();
     dropStart = Date.now();
   }
+  if(!gameOver)
   requestAnimationFrame(drop);
 }
 
