@@ -94,52 +94,125 @@ Piece.prototype.unDraw = function(){
 //move piece down
 
 Piece.prototype.moveDown = function(){
-  this.unDraw();
-  this.y++;
-  this.draw();
+  if(!this.col_detect(0,1,this.activeTetromino))
+  {
+    this.unDraw();
+    this.y++;
+    this.draw();
+  }
+  else //lock the piece and generate new pieces
+  {
+
+  }
 }
 
 //move the piece right
 
 Piece.prototype.moveRight = function(){
-  this.unDraw();
-  this.x++;
-  this.draw();
+  if(!this.col_detect(1,0,this.activeTetromino))
+  {
+    this.unDraw();
+    this.x++;
+    this.draw();
+  }
+  else //lock the piece and generate new pieces
+  {
+
+  }
 }
 
 //move the piece left
 
 Piece.prototype.moveLeft = function(){
-  this.unDraw();
-  this.x--;
-  this.draw();
+  if(!this.col_detect(-1,0,this.activeTetromino))
+  {
+    this.unDraw();
+    this.x--;
+    this.draw();
+  }
+  else //lock the piece and generate new pieces
+  {
+
+  }
 }
 
 //rotate the piece
 Piece.prototype.rotate = function(){
-  this.unDraw();
-  this.tetrominoN = (this.tetrominoN + 1) % (this.tetromino.length);
-  this.activeTetromino = this.activeTetromino[this.tetrominoN];
-  this.draw();
+  let n = (this.tetrominoN + 1) % (this.tetromino.length);
+  let nextpat = this.tetromino[n];
+  if(!this.col_detect(0,0,nextpat))
+  {
+    this.unDraw();
+    this.tetrominoN = (this.tetrominoN + 1) % (this.tetromino.length);
+    this.activeTetromino = this.tetromino[this.tetrominoN];
+    this.draw();
+  }
+  else //lock the piece and generate new one
+  {
+
+  }
 }
-//hello, which key you looking for??
+
+//collison detection
+Piece.prototype.col_detect = function (x,y,piece){
+  for(var r=0 ; r<piece.length ; r++){
+    for( var c=0 ; c<piece.length ; c++){
+      //if the square is empty, skip it
+      if(!piece[r][c])
+      {
+      continue;
+      }
+      //coordinates of piece after movement
+      let newX = this.x + c + x;
+      let newY = this.y + r + y;
+      //conditions
+      if(newX < 0 || newX >= col || newY >= row){
+        return true;
+      }
+      //skip if newY < 0, as board[-1] will crash the game
+      if(newY < 0){
+        continue;
+      }
+      //check if there is locked piece on board
+      if(board[newY][newX] != vacant){
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+//hello, which key you looking for??(inspired by Lionel Richie)
 document.addEventListener("keydown", check);
 
 function check(e){
   if(e.keyCode == 37)
+  {
     p.moveLeft();
+    dropStart = Date.now(); //the piece will not drop while we click the respective arrows
+  }
   else if(e.keyCode == 38)
+  {
     p.rotate();
+    dropStart = Date.now();
+  }
   else if(e.keyCode == 39)
+  {
     p.moveRight();
+    dropStart = Date.now();
+  }
   else if(e.keyCode == 40)
+  {
     p.moveDown();
+    dropStart = Date.now();
+  }
 
   }
 
 
 //1sec interval for dropping the pieces
 let dropStart = Date.now();
+
 function drop(){
   let now = Date.now();
   let delta = now - dropStart;
