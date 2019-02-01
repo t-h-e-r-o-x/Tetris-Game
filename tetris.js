@@ -1,8 +1,10 @@
 const cvs =  document.getElementById("tetris");
 const ctx = cvs.getContext("2d");
+const scr = document.getElementById("score");
 
-const row = 20;
-const col = column = 10;
+var s = 0;
+var row = 20;
+var col = 10;
 const sq = squareSize = 20;
 const vacant = "WHITE"; //colour of empty square
 
@@ -34,6 +36,7 @@ function drawBoard() {
       drawSquare(c,r,board[r][c]);
     }
   }
+  scr.innerText = "Score : " + s;
 }
 
 drawBoard();
@@ -166,7 +169,7 @@ Piece.prototype.lock = function(){
     for(var c=0 ; c< this.activeTetromino.length; c++){
       if(this.activeTetromino[r][c]){
         if(this.y + r < 0){
-          alert("Game Over");
+         alert("Game Over");
           gameOver = true;
           break;
         }
@@ -193,8 +196,10 @@ Piece.prototype.lock = function(){
       for(var n = 0 ; n<col ; n++){
         board[0][n] = vacant;
       }
+      s+=10;
     }
   }
+  drawBoard();
 }
 
 //collison detection
